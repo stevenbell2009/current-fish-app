@@ -31,7 +31,7 @@ def uv_to_polar(u, v):
 
 st.set_page_config(page_title="Current Fish – Section 1", layout="centered")
 
-st.title("Current Fish – TRUE Current Calculator (Section 1 Only)")
+st.title("Current Fish – TRUE Current Calculator (Liam barclay Idea App by Steven Bell)")
 st.caption("Bearings TRUE (0° = North, clockwise).")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
@@ -89,3 +89,4 @@ if st.button("Calculate TRUE current"):
 
 else:
     st.info("Enter values, then click **Calculate TRUE current**.")
+
