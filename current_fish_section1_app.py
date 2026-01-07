@@ -14,17 +14,8 @@ def from_ms(value_ms, unit):
 
 # --- Heading wrap helper (0–359°) ---
 
-def wrap_deg(v):
-    return int(v) % 360
-
-
-# --- Initialize heading state ---
-
-if "fish_brg" not in st.session_state:
-    st.session_state.fish_brg = 0
-
-if "ship_cse" not in st.session_state:
-    st.session_state.ship_cse = 0
+def wrap_deg(value):
+    return int(value) % 360
 
 
 # --- Vector helpers (always operate in m/s) ---
@@ -58,13 +49,12 @@ st.set_page_config(
 
 st.title("Liam Barclay – True Current")
 st.caption("App created by Steven Bell")
+
 st.caption("Bearings TRUE (0° = North, clockwise). Speeds in selected units.")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
 
 col1, col2 = st.columns(2)
-
-# --- FISH PANEL ---
 
 with col1:
     st.markdown("### Fish apparent")
@@ -75,34 +65,16 @@ with col1:
         step=0.1
     )
 
-    st.write("**Fish Bearing (° TRUE)**")
+    fish_brg_raw = st.number_input(
+        "Fish Bearing (° TRUE)",
+        value=0,
+        step=1,
+        format="%d"
+    )
 
-    fb_minus, fb_input, fb_plus = st.columns([1, 2, 1])
+    # Wrap to 0–359° for calculations
+    fish_brg = wrap_deg(fish_brg_raw)
 
-    with fb_minus:
-        if st.button("−", use_container_width=True, key="fb_minus"):
-            st.session_state.fish_brg = wrap_deg(st.session_state.fish_brg - 1)
-
-    with fb_input:
-        # main input for typing
-        st.session_state.fish_brg = st.number_input(
-            " ",
-            min_value=0,
-            max_value=359,
-            step=1,
-            value=st.session_state.fish_brg,
-            format="%d",
-            key="fish_brg_input",
-        )
-
-    with fb_plus:
-        if st.button("+", use_container_width=True, key="fb_plus"):
-            st.session_state.fish_brg = wrap_deg(st.session_state.fish_brg + 1)
-
-    fish_brg = st.session_state.fish_brg
-
-
-# --- VESSEL PANEL ---
 
 with col2:
     st.markdown("### Vessel motion")
@@ -113,33 +85,16 @@ with col2:
         step=0.1
     )
 
-    st.write("**Vessel Course (° TRUE)**")
+    ship_cse_raw = st.number_input(
+        "Vessel Course (° TRUE)",
+        value=0,
+        step=1,
+        format="%d"
+    )
 
-    vc_minus, vc_input, vc_plus = st.columns([1, 2, 1])
+    # Wrap to 0–359° for calculations
+    ship_cse = wrap_deg(ship_cse_raw)
 
-    with vc_minus:
-        if st.button("−", use_container_width=True, key="vc_minus"):
-            st.session_state.ship_cse = wrap_deg(st.session_state.ship_cse - 1)
-
-    with vc_input:
-        st.session_state.ship_cse = st.number_input(
-            "  ",
-            min_value=0,
-            max_value=359,
-            step=1,
-            value=st.session_state.ship_cse,
-            format="%d",
-            key="ship_cse_input",
-        )
-
-    with vc_plus:
-        if st.button("+", use_container_width=True, key="vc_plus"):
-            st.session_state.ship_cse = wrap_deg(st.session_state.ship_cse + 1)
-
-    ship_cse = st.session_state.ship_cse
-
-
-# --- CALCULATION ---
 
 if st.button("Calculate TRUE current"):
 
