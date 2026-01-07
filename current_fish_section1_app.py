@@ -12,6 +12,12 @@ def from_ms(value_ms, unit):
     return value_ms / KNOT_TO_MS if unit == "knots" else value_ms
 
 
+# --- Heading wrap helper (0–359°) ---
+
+def wrap_deg(value):
+    return int(value) % 360
+
+
 # --- Vector helpers (always operate in m/s) ---
 
 def polar_to_uv(speed_ms, bearing_deg):
@@ -29,7 +35,7 @@ def uv_to_polar(u, v):
     Returns (speed_ms, bearing_deg) with 0° = North, clockwise.
     """
     speed = np.hypot(u, v)
-    brg_rad = np.arctan2(u, v)  # (u, v) → 0 deg = north
+    brg_rad = np.arctan2(u, v)
     brg_deg = (np.rad2deg(brg_rad) + 360.0) % 360.0
     return speed, brg_deg
 
@@ -37,14 +43,12 @@ def uv_to_polar(u, v):
 # --- UI ---
 
 st.set_page_config(
-    page_title="Liam Barclay – True Current ",
+    page_title="Liam Barclay Idea – Current Fish App",
     layout="centered"
 )
 
-st.title("Liam Barclay – True Current")
-st.caption("App Created by Steven Bell")
-
-st.caption("Bearings TRUE (0° = North, clockwise). Speeds in selected units.")
+st.title("Liam Barclay– True Current")
+st.caption(" App created by Steven Bell")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
 
@@ -52,31 +56,51 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.markdown("### Fish apparent")
-    fish_speed_in = st.number_input(f"Fish Speed ({unit})", value=0.0, step=0.1)
-    fish_brg = st.number_input(
+
+    fish_speed_in = st.number_input(
+        f"Fish Speed ({unit})",
+        value=0.0,
+        step=0.1
+    )
+
+    fish_brg_raw = st.number_input(
         "Fish Bearing (° TRUE)",
         value=0,
         step=1,
         format="%d"
     )
 
+    # Wrap to 0–359°
+    fish_brg = wrap_deg(fish_brg_raw)
+
+
 with col2:
     st.markdown("### Vessel motion")
-    ship_speed_in = st.number_input(f"Vessel Speed ({unit})", value=0.0, step=0.1)
-    ship_cse = st.number_input(
+
+    ship_speed_in = st.number_input(
+        f"Vessel Speed ({unit})",
+        value=0.0,
+        step=0.1
+    )
+
+    ship_cse_raw = st.number_input(
         "Vessel Course (° TRUE)",
         value=0,
         step=1,
         format="%d"
     )
 
+    # Wrap to 0–359°
+    ship_cse = wrap_deg(ship_cse_raw)
+
+
 if st.button("Calculate TRUE current"):
 
-    # Convert inputs -> m/s
+    # Convert speeds -> m/s
     fish_speed_ms = to_ms(fish_speed_in, unit)
     ship_speed_ms = to_ms(ship_speed_in, unit)
 
-    # Vectors in m/s
+    # Compute vectors
     u_fish, v_fish = polar_to_uv(fish_speed_ms, fish_brg)
     u_ship, v_ship = polar_to_uv(ship_speed_ms, ship_cse)
 
@@ -85,14 +109,14 @@ if st.button("Calculate TRUE current"):
     v_cur = v_fish + v_ship
     cur_speed_ms, cur_brg = uv_to_polar(u_cur, v_cur)
 
-    # Convert outputs back to selected unit
+    # Convert output to selected unit
     cur_speed_out = from_ms(cur_speed_ms, unit)
 
     st.markdown("## TRUE Current Result")
     st.write(f"**Speed:** {cur_speed_out:.3f} {unit}")
     st.write(f"**Bearing:** {cur_brg:.3f} ° TRUE")
 
-    # Also show in the other unit
+    # Show alternate unit also
     alt_unit = "m/s" if unit == "knots" else "knots"
     cur_speed_alt = from_ms(cur_speed_ms, alt_unit)
     st.caption(f"(= {cur_speed_alt:.3f} {alt_unit})")
