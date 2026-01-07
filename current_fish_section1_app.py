@@ -14,7 +14,8 @@ def from_ms(value_ms, unit):
 
 # --- Heading wrap helper (0–359°) ---
 
-def wrap_deg(value):
+def wrap_deg(value: int) -> int:
+    """Wrap any integer heading into 0–359°."""
     return int(value) % 360
 
 
@@ -43,12 +44,13 @@ def uv_to_polar(u, v):
 # --- UI ---
 
 st.set_page_config(
-    page_title="Liam Barclay Idea – Current Fish App",
+    page_title="Liam Barclay – True Current",
     layout="centered"
 )
 
-st.title("Liam Barclay– True Current")
-st.caption(" App created by Steven Bell")
+st.title("Liam Barclay – True Current")
+st.caption("App created by Steven Bell")
+st.caption("Bearings TRUE (0° = North, clockwise). Speeds in selected units.")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
 
@@ -67,11 +69,14 @@ with col1:
         "Fish Bearing (° TRUE)",
         value=0,
         step=1,
-        format="%d"
+        format="%d",
+        key="fish_brg"
     )
 
-    # Wrap to 0–359°
+    # Wrap to 0–359° and write back so the display never shows 500, -10, etc.
     fish_brg = wrap_deg(fish_brg_raw)
+    if fish_brg != fish_brg_raw:
+        st.session_state["fish_brg"] = fish_brg
 
 
 with col2:
@@ -87,11 +92,14 @@ with col2:
         "Vessel Course (° TRUE)",
         value=0,
         step=1,
-        format="%d"
+        format="%d",
+        key="ship_cse"
     )
 
-    # Wrap to 0–359°
+    # Wrap to 0–359° and write back
     ship_cse = wrap_deg(ship_cse_raw)
+    if ship_cse != ship_cse_raw:
+        st.session_state["ship_cse"] = ship_cse
 
 
 if st.button("Calculate TRUE current"):
