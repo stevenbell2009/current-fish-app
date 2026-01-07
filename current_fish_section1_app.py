@@ -31,8 +31,8 @@ def uv_to_polar(u, v):
 
 st.set_page_config(page_title="Current Fish App", layout="centered")
 
-st.title("Liam Barclay Idea - Current Fish App")
-st.caption("Created by Steven Bell")
+st.title("Liam Barclay - true Current")
+st.caption("App Created by Steven Bell")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
 
@@ -89,5 +89,6 @@ if st.button("Calculate TRUE current"):
 
 else:
     st.info("Enter values, then click **Calculate TRUE current**.")
+
 
 
