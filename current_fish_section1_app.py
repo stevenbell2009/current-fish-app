@@ -50,7 +50,6 @@ st.set_page_config(
 st.title("Liam Barclay – True Current")
 st.caption("App created by Steven Bell")
 
-st.caption("Bearings TRUE (0° = North, clockwise). Speeds in selected units.")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
 
@@ -137,3 +136,4 @@ if st.button("Calculate TRUE current"):
 
 else:
     st.info("Enter values, then click **Calculate TRUE current**.")
+
