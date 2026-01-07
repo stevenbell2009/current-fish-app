@@ -1,9 +1,9 @@
-import numpy as np 
+import numpy as np
 import streamlit as st
 
 # --- Unit helpers ---
 
-KNOT_TO_MS = 0.514444 # 1 knot = 0.514444 m/s
+KNOT_TO_MS = 0.514444  # 1 knot = 0.514444 m/s
 
 def to_ms(value, unit):
     return value * KNOT_TO_MS if unit == "knots" else value
@@ -15,24 +15,36 @@ def from_ms(value_ms, unit):
 # --- Vector helpers (always operate in m/s) ---
 
 def polar_to_uv(speed_ms, bearing_deg):
+    """
+    0° = North, clockwise.
+    Returns (u_east, v_north) in m/s.
+    """
     b_rad = np.deg2rad(bearing_deg)
-    u = speed_ms * np.sin(b_rad) # east
-    v = speed_ms * np.cos(b_rad) # north
+    u = speed_ms * np.sin(b_rad)  # east
+    v = speed_ms * np.cos(b_rad)  # north
     return u, v
 
 def uv_to_polar(u, v):
+    """
+    Returns (speed_ms, bearing_deg) with 0° = North, clockwise.
+    """
     speed = np.hypot(u, v)
-    brg_rad = np.arctan2(u, v)
+    brg_rad = np.arctan2(u, v)  # (u, v) → 0 deg = north
     brg_deg = (np.rad2deg(brg_rad) + 360.0) % 360.0
     return speed, brg_deg
 
 
 # --- UI ---
 
-st.set_page_config(page_title="Current Fish App", layout="centered")
+st.set_page_config(
+    page_title="Liam Barclay – True Current ",
+    layout="centered"
+)
 
-st.title("Liam Barclay - True Current")
+st.title("Liam Barclay – True Current")
 st.caption("App Created by Steven Bell")
+
+st.caption("Bearings TRUE (0° = North, clockwise). Speeds in selected units.")
 
 unit = st.radio("Select units", ["knots", "m/s"], horizontal=True)
 
@@ -41,12 +53,22 @@ col1, col2 = st.columns(2)
 with col1:
     st.markdown("### Fish apparent")
     fish_speed_in = st.number_input(f"Fish Speed ({unit})", value=0.0, step=0.1)
-    fish_brg = st.number_input("Fish Bearing (° TRUE)", value=0.0, step=1.0)
+    fish_brg = st.number_input(
+        "Fish Bearing (° TRUE)",
+        value=0,
+        step=1,
+        format="%d"
+    )
 
 with col2:
     st.markdown("### Vessel motion")
     ship_speed_in = st.number_input(f"Vessel Speed ({unit})", value=0.0, step=0.1)
-    ship_cse = st.number_input("Vessel Course (° TRUE)", value=0.0, step=1.0)
+    ship_cse = st.number_input(
+        "Vessel Course (° TRUE)",
+        value=0,
+        step=1,
+        format="%d"
+    )
 
 if st.button("Calculate TRUE current"):
 
@@ -70,7 +92,7 @@ if st.button("Calculate TRUE current"):
     st.write(f"**Speed:** {cur_speed_out:.3f} {unit}")
     st.write(f"**Bearing:** {cur_brg:.3f} ° TRUE")
 
-    # Optional: show alternate unit too
+    # Also show in the other unit
     alt_unit = "m/s" if unit == "knots" else "knots"
     cur_speed_alt = from_ms(cur_speed_ms, alt_unit)
     st.caption(f"(= {cur_speed_alt:.3f} {alt_unit})")
@@ -89,7 +111,3 @@ if st.button("Calculate TRUE current"):
 
 else:
     st.info("Enter values, then click **Calculate TRUE current**.")
-
-
-
-
